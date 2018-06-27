@@ -56,4 +56,4 @@ urlpatterns = [
 ]
 
 # integratie google, online woordenboek iets in die richting?
-# Google translat uitspraak
+# Google translate uitspraak
