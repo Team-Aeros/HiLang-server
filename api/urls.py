@@ -22,21 +22,27 @@ urlpatterns = [
     path('courses/<int:user_id>/', views.get_user_courses, name='user courses'),
     path('course/language/<int:language_id>/', views.get_course_lang, name='course_by_lang'),
     path('course/<int:course_id>/', views.get_course, name='course'),
+    path('course/<int:course_id>/delete/', views.delete_course, name='delete_course'),
     path('course/create/', views.create_course, name='create_course'),
     path('course/<int:course_id>/edit_desc', views.edit_course_desc, name='edit_course_desc'),
     path('course/<int:course_id>/edit_lang', views.edit_course_lang, name='edit_course_lang'),
     path('course/search', views.search_courses,name="search_courses"),
+    path('course/update/', views.update_course, name="update_course"),
+    path('course/popular/', views.get_popular_courses, name="popular_courses"),
+    path('course/newest/', views.get_newest_courses, name="newest_courses"),
 
     # Lessons
     path('course/<int:course_id>/create-lesson', views.create_lesson, name='create_lesson'),
+    path('course/<int:lesson_id>/get_questions', views.get_sentence_questions, name='get_questions'),
     path('lesson/<int:id>', views.get_lesson, name='lesson'),
-    path('lesson/<int:id>/delete', views.delete_lesson, name='lesson_delete'),
+    path('lesson/<int:id>/delete/', views.delete_lesson, name='lesson_delete'),
     path('course/<int:course_id>/lessons', views.get_course_lessons, name='course_lessons'),
     path('lesson/<int:id>/details', views.get_lesson_det, name='lesson_details'),
     path('lesson/<int:lesson_id>/edit_desc', views.edit_lesson_desc, name='edit_lesson_desc'),
     path('lessontypes', views.get_lesson_types, name='lesson_type'),
     path('lesson/<int:user_id>/<int:lesson_id>/completed', views.set_lesson_completed, name="lesson_completed"),
     path('lesson/<int:user_id>/getcompleted', views.get_completed_lessons, name="get_completed_lessons"),
+
 
     # Languages
     path('languages/', views.get_languages, name='languages'),

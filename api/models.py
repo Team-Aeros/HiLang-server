@@ -8,6 +8,8 @@ class User(models.Model):
     distributor = models.PositiveSmallIntegerField(default=0)
     salt = models.CharField(max_length=50, null=True)
     attempt = models.IntegerField(default=0)
+    bio = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.email
@@ -58,6 +60,7 @@ class Course(models.Model):
     native_lang = models.ForeignKey(Language, on_delete=models.CASCADE, null=True, related_name='native')
     trans_lang = models.ForeignKey(Language, null=True, on_delete=models.CASCADE, related_name='translation')
     public = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -123,7 +126,7 @@ class Lesson(models.Model):
     description = models.TextField(null=True)
     grammar = models.TextField(null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    lessonType = models.ForeignKey(LessonType, null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now=True)
 
     def delete(self, user_id):
         user = User.objects.get(pk=user_id)
@@ -143,51 +146,21 @@ class Lesson(models.Model):
             "lessontype": self.lessonType,
         }
 
-
 class LessonCompleted(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     grade = models.DecimalField(max_digits=3, decimal_places=1)
-
+    
 
 class WordListQuestion(models.Model):
     native = models.CharField(max_length=100)
     translation = models.CharField(max_length=100)
     lesson = models.ForeignKey(Lesson, null=True, on_delete=models.CASCADE)
+    sentenceStructure = models.BooleanField(default=False)
 
     def __repr__(self):
         return {
             "native": self.native,
             "translation": self.translation,
             "lesson": self.lesson,
-        }
-
-
-class SentenceStructureQuestion(models.Model):
-    native = models.CharField(max_length=100)
-    translation = models.CharField(max_length=100)
-    correctOrder = models.CharField(max_length=20)
-    lesson = models.ForeignKey(Lesson, null=True, on_delete=models.CASCADE)
-    description = models.TextField(null=True)
-
-    def __repr__(self):
-        return {
-            "native": self.native,
-            "translation": self.translation,
-            "correctOrder": self.correctOrder,
-            "lesson": self.lesson,
-            "desc": self.description,
-        }
-
-
-class SentenceStructureOption(models.Model):
-    value = models.CharField(max_length=100)
-    tag = models.IntegerField()
-    question = models.ForeignKey(SentenceStructureQuestion, on_delete=models.CASCADE)
-
-    def __repr__(self):
-        return {
-            "value": self.value,
-            "tag": self.tag,
-            "question": self.question,
         }
