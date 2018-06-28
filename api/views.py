@@ -51,6 +51,7 @@ def parse_params(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         if validate_token(data['user_id'], data['token']):
+            data['params']['user_id'] = data['user_id']
             return data['params']
     return None
 
@@ -356,14 +357,15 @@ def create_lesson(request, course_id):
     if data is None:
         return HttpResponseForbidden()
     try:
-        # Is this course yours???
-        course = Course.objects.get(pk=course_id)
+        user = User.objects.get(pk=data['user_id'])
+        course = Course.objects.get(pk=course_id, user=user)
     except ObjectDoesNotExist:
         return get_json_response(serializers.serialize('json', []))
 
+
+
     created = False
-    print(data);
-    if 'lesson_id' in data:
+    if data['lesson_id'] != '':
         created = True
     if (not created):
         lesson = Lesson.objects.create(name=data['title'],
@@ -383,6 +385,8 @@ def create_lesson(request, course_id):
 
     upload_questions(data['questions'], lesson)
     return get_json_response(serializers.serialize('json', [lesson]))
+
+
 
 def upload_questions(questions, lesson):
     for question in questions:
