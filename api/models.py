@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class User(models.Model):
     email = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=25)
@@ -10,6 +11,7 @@ class User(models.Model):
     attempt = models.IntegerField(default=0)
     bio = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now=True)
+    avatar = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return self.email
