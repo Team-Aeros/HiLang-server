@@ -438,7 +438,6 @@ def get_lesson(request, id):
     try:
         lesson = Lesson.objects.get(pk=id)
         lesson_vocabulary = list(WordListQuestion.objects.filter(lesson=id).values())
-
         json_data = {
             'id': lesson.id,
             'name': lesson.name,
@@ -446,6 +445,7 @@ def get_lesson(request, id):
             'description': lesson.description,
             'grammar': lesson.grammar,
             'course_id': lesson.course_id,
+            'short_name': lesson.course.trans_lang.short_name,
             'vocabulary': lesson_vocabulary
         }
         return JsonResponse(json_data)
