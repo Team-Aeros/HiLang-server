@@ -133,7 +133,9 @@ def get_user(request, user_id):
                              'name': user.name,
                              'email': user.email,
                              'distributor': user.distributor,
-                             'created_at': user.created_at}, safe=False)
+                             'created_at': user.created_at,
+                             'bio': user.bio,
+                             'avatar': user.avatar}, safe=False)
     except ObjectDoesNotExist:
         return JsonResponse({}, safe=False)
 
@@ -261,6 +263,7 @@ def get_user_courses(request, user_id):
     courseData = Course.objects.filter(user=User.objects.get(pk=user_id))
     return get_json_response(serializers.serialize('json', courseData))
 
+
 def delete_course(request, course_id):
     data = parse_params(request)
     if data is None:
@@ -274,6 +277,7 @@ def delete_course(request, course_id):
     except ObjectDoesNotExist:
         return HttpResponse("false")
 
+
 def edit_course_desc(request, course_id):
     data = parse_params(request)
     if data is None:
@@ -283,6 +287,7 @@ def edit_course_desc(request, course_id):
     course.description = data['desc']
     course.save()
     return HttpResponse(request)
+
 
 def update_course(request):
     data = parse_params(request)
@@ -311,6 +316,7 @@ def edit_course_lang(request, course_id):
     course.trans_lang = Language.objects.get(pk=data['lang_id'])
     course.save()
     return HttpResponse(request)
+
 
 def search_courses(request):
     data = parse_params(request)
