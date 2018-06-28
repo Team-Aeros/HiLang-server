@@ -30,6 +30,8 @@ urlpatterns = [
     path('course/update/', views.update_course, name="update_course"),
     path('course/popular/', views.get_popular_courses, name="popular_courses"),
     path('course/newest/', views.get_newest_courses, name="newest_courses"),
+    path('update_activity/', views.update_activity, name="update_activity"),
+    path('last_accessed/', views.get_last_accessed, name="last_accessed"),
 
     # Lessons
     path('course/<int:course_id>/create-lesson', views.create_lesson, name='create_lesson'),
