@@ -4,6 +4,7 @@ from django.core import serializers
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden
 from django.contrib.auth import authenticate, login
+from django.utils import timezone
 import json
 import string
 import random
@@ -11,7 +12,6 @@ import pprint
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from api.models import *
-
 
 def index(request):
     return HttpResponse("Dit is een API")
@@ -51,6 +51,7 @@ def parse_params(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
         if validate_token(data['user_id'], data['token']):
+            data['params']['user_id'] = data['user_id']
             return data['params']
     return None
 
@@ -112,7 +113,6 @@ def create_session(user):
                 'token': token.token
                 }
     return response
-
 
 # Users
 def get_users(request):
@@ -346,6 +346,40 @@ def search_courses(request):
             })
     return JsonResponse(returnData, safe=False)
 
+def update_activity(request):
+    data = parse_params(request)
+    if data is None:
+        return HttpResponseForbidden()
+
+    course = Course.objects.get(pk=data['course_id'])
+    user = User.objects.get(pk=data['user_id'])
+    try:
+        subscription = Subscription.objects.get(course=course, user=user)
+        subscription.last_accessed = timezone.now()
+        subscription.save()
+    except ObjectDoesNotExist:
+        pass
+    return HttpResponse("");
+
+def get_last_accessed(request):
+    data = parse_params(request)
+    if data is None:
+        return HttpResponseForbidden()
+
+    courses = []
+    subscriptions = Subscription.objects.order_by('-last_accessed')[:4]
+    for subscription in subscriptions:
+        courses.append({
+            'id'          : subscription.course.pk,
+            'name'        : subscription.course.name,
+            'description' : subscription.course.description,
+            'image'       : subscription.course.image,
+            'subscribers' : subscription.course.subscribers,
+            'author'      : subscription.course.user.name,
+            'trans_lang'  : subscription.course.trans_lang.pk,
+            'native_lang' : subscription.course.native_lang.pk
+        })
+    return JsonResponse(courses, safe=False);
 
 # Lessons
 def get_lesson_types(request):
@@ -360,14 +394,13 @@ def create_lesson(request, course_id):
     if data is None:
         return HttpResponseForbidden()
     try:
-        # Is this course yours???
-        course = Course.objects.get(pk=course_id)
+        user = User.objects.get(pk=data['user_id'])
+        course = Course.objects.get(pk=course_id, user=user)
     except ObjectDoesNotExist:
         return get_json_response(serializers.serialize('json', []))
 
     created = False
-    print(data);
-    if 'lesson_id' in data:
+    if data['lesson_id'] != '':
         created = True
     if (not created):
         lesson = Lesson.objects.create(name=data['title'],
@@ -387,6 +420,8 @@ def create_lesson(request, course_id):
 
     upload_questions(data['questions'], lesson)
     return get_json_response(serializers.serialize('json', [lesson]))
+
+
 
 def upload_questions(questions, lesson):
     for question in questions:

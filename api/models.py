@@ -82,6 +82,7 @@ class Course(models.Model):
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    last_accessed = models.DateTimeField(null=True)
 
     def __str__(self):
         return '{} : {}'.format(self.user, self.course)
@@ -90,6 +91,7 @@ class Subscription(models.Model):
         return {
             "user": self.user,
             "course": self.course,
+            "last_accessed": self.last_accessed,
         }
 
 
@@ -152,7 +154,7 @@ class LessonCompleted(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     grade = models.DecimalField(max_digits=3, decimal_places=1)
-    
+
 
 class WordListQuestion(models.Model):
     native = models.CharField(max_length=100)
