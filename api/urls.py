@@ -16,7 +16,7 @@ urlpatterns = [
     path('user/<int:user_id>/', views.get_user, name='user'),
     path('user/create/', views.create_user, name='create_user'),
     path('user/<int:user_id>/edituser/', views.edit_user, name='save_user'),
-
+    path('user/distributor/', views.is_distributor, name='is_distributor'),
 
     # Courses
     path('courses/',views.get_courses, name='courses'),

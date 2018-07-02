@@ -193,7 +193,7 @@ def get_popular_courses(request):
     if 'lang' in data:
         HttpResponse('test');
     else:
-        courses = Course.objects.order_by('-subscribers')[:10]
+        courses = Course.objects.filter(public=1).order_by('-subscribers')[:10]
     return get_json_response(serializers.serialize('json', courses))
 
 
@@ -205,7 +205,7 @@ def get_newest_courses(request):
     if 'lang' in data:
         HttpResponse('test');
     else:
-        courses = Course.objects.order_by('-created_at')[:10]
+        courses = Course.objects.filter(public=1).order_by('-created_at')[:10]
     return get_json_response(serializers.serialize('json', courses))
 
 
@@ -217,18 +217,12 @@ def get_course(request, course_id):
     try:
         courseData = Course.objects.get(id=course_id)
         authorData = User.objects.get(pk=courseData.user.pk)
+        user = User.objects.get(pk=data['user_id'])
         print(courseData);
-        favoriteData = Favorite.objects.filter(user=authorData, course=Course.objects.get(pk=course_id))
-        subscriptionData = Subscription.objects.filter(user=authorData, course=Course.objects.get(pk=course_id))
-        if not favoriteData:
-            favorite = False
-        else:
-            favorite = True
-
-        if not subscriptionData:
-            subscription = False
-        else:
-            subscription = True
+        favoriteData = Favorite.objects.filter(user=user, course=Course.objects.get(pk=course_id))
+        subscriptionData = Subscription.objects.filter(user=user, course=Course.objects.get(pk=course_id))
+        favorite = False if not favoriteData else True
+        subscription = False if not subscriptionData else True
 
         returnData = {
             'id': courseData.id,
@@ -242,9 +236,11 @@ def get_course(request, course_id):
             'favorite': favorite,
             'subscription': subscription,
             'created_at': courseData.created_at.strftime("%d %b %Y"),
+            'public': courseData.public
         }
         return JsonResponse(returnData)
     except Exception as e:
+        print(e)
         return HttpResponse('false')
 
 
@@ -322,6 +318,7 @@ def update_course(request):
         course.image = data['image']
         course.native_lang = Language.objects.get(pk=data['native_lang'])
         course.trans_lang = Language.objects.get(pk=data['target_lang'])
+        course.public = data['is_public']
         course.save()
     except ObjectDoesNotExist:
         return HttpResponse('false');
@@ -354,7 +351,7 @@ def search_courses(request):
         for returnCourse in returnData:
             if course.pk == returnCourse['id']:
                 unique = False
-        if unique:
+        if unique and (course.public == 1):
             returnData.append({
                 'id': course.pk,
                 'name': course.name,
@@ -390,17 +387,18 @@ def get_last_accessed(request):
         return HttpResponseForbidden()
 
     courses = []
-    subscriptions = Subscription.objects.order_by('-last_accessed')[:4]
+    subscriptions = Subscription.objects.filter(user=User.objects.get(pk=data['user_id'])).order_by('-last_accessed')[:4]
     for subscription in subscriptions:
         courses.append({
-            'id': subscription.course.pk,
-            'name': subscription.course.name,
-            'description': subscription.course.description,
-            'image': subscription.course.image,
-            'subscribers': subscription.course.subscribers,
-            'author': subscription.course.user.name,
-            'trans_lang': subscription.course.trans_lang.pk,
-            'native_lang': subscription.course.native_lang.pk
+            'id'          : subscription.course.pk,
+            'name'        : subscription.course.name,
+            'description' : subscription.course.description,
+            'image'       : subscription.course.image,
+            'subscribers' : subscription.course.subscribers,
+            'author'      : subscription.course.user.name,
+            'trans_lang'  : subscription.course.trans_lang.pk,
+            'native_lang' : subscription.course.native_lang.pk,
+            'public'      : subscription.course.public
         })
     return JsonResponse(courses, safe=False);
 
@@ -538,18 +536,30 @@ def get_lesson_det(request, id):
         nativeData = Language.objects.get(pk=courseData.native_lang.id)
         transData = Language.objects.get(pk=courseData.trans_lang.id)
         returnData = {
-            "id": lessonData.id,
-            "name": lessonData.name,
-            "cat": lessonData.category,
-            "desc": lessonData.description,
-            "grammar": lessonData.grammar,
-            "native": nativeData.name,
-            "trans": transData.name
+            'id': lessonData.id,
+            'name': lessonData.name,
+            'cat': lessonData.category,
+            'desc': lessonData.description,
+            'grammar': lessonData.grammar,
+            'native': nativeData.name,
+            'trans': transData.name
         }
         return JsonResponse(returnData)
     except ObjectDoesNotExist:
         return HttpResponse("false")
 
+def is_distributor(request):
+    data = parse_params(request)
+    if data is None:
+        return HttpResponseForbidden()
+
+    try:
+        user = User.objects.get(pk=data['user_id'])
+        if (user.distributor == 1):
+            return HttpResponse('true')
+    except ObjectDoesNotExist:
+        pass
+    return HttpResponse('false')
 
 def edit_lesson_desc(request, lesson_id):
     data = parse_params(request)
