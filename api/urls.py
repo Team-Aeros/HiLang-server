@@ -15,6 +15,7 @@ urlpatterns = [
     path('users/',views.get_users, name='users'),
     path('user/<int:user_id>/', views.get_user, name='user'),
     path('user/create/', views.create_user, name='create_user'),
+    path('user/distributor/', views.is_distributor, name='is_distributor'),
 
     # Courses
     path('courses/',views.get_courses, name='courses'),
@@ -30,6 +31,8 @@ urlpatterns = [
     path('course/update/', views.update_course, name="update_course"),
     path('course/popular/', views.get_popular_courses, name="popular_courses"),
     path('course/newest/', views.get_newest_courses, name="newest_courses"),
+    path('update_activity/', views.update_activity, name="update_activity"),
+    path('last_accessed/', views.get_last_accessed, name="last_accessed"),
 
     # Lessons
     path('course/<int:course_id>/create-lesson', views.create_lesson, name='create_lesson'),
