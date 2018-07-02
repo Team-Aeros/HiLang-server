@@ -199,12 +199,10 @@ def get_course(request, course_id):
         courseData = Course.objects.get(id=course_id)
         authorData = User.objects.get(pk=courseData.user.pk)
         user = User.objects.get(pk=data['user_id'])
-        print(courseData);
         favoriteData = Favorite.objects.filter(user=user, course=Course.objects.get(pk=course_id))
         subscriptionData = Subscription.objects.filter(user=user, course=Course.objects.get(pk=course_id))
         favorite = False if not favoriteData else True
         subscription = False if not subscriptionData else True
-
         returnData = {
             'id': courseData.id,
             'name': courseData.name,
