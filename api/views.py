@@ -166,6 +166,7 @@ def get_courses(request):
         return HttpResponseForbidden()
     return get_json_response(serializers.serialize('json', Course.objects.all()))
 
+
 def get_popular_courses(request):
     data = parse_params(request)
     if data is None:
@@ -176,6 +177,7 @@ def get_popular_courses(request):
     else:
         courses = Course.objects.order_by('-subscribers')[:10]
     return get_json_response(serializers.serialize('json', courses))
+
 
 def get_newest_courses(request):
     data = parse_params(request)
@@ -188,6 +190,7 @@ def get_newest_courses(request):
         courses = Course.objects.order_by('-created_at')[:10]
     return get_json_response(serializers.serialize('json', courses))
 
+
 def get_course(request, course_id):
     data = parse_params(request)
     if data is None:
@@ -196,7 +199,6 @@ def get_course(request, course_id):
     try:
         courseData = Course.objects.get(id=course_id)
         authorData = User.objects.get(pk=courseData.user.pk)
-        print(courseData);
         favoriteData = Favorite.objects.filter(user=authorData, course=Course.objects.get(pk=course_id))
         subscriptionData = Subscription.objects.filter(user=authorData, course=Course.objects.get(pk=course_id))
         if not favoriteData:
@@ -225,6 +227,7 @@ def get_course(request, course_id):
         return JsonResponse(returnData)
     except Exception as e:
         return HttpResponse('false')
+
 
 def get_public_courses(request):
     data = parse_params(request)
@@ -261,6 +264,7 @@ def get_user_courses(request, user_id):
     courseData = Course.objects.filter(user=User.objects.get(pk=user_id))
     return get_json_response(serializers.serialize('json', courseData))
 
+
 def delete_course(request, course_id):
     data = parse_params(request)
     if data is None:
@@ -274,6 +278,7 @@ def delete_course(request, course_id):
     except ObjectDoesNotExist:
         return HttpResponse("false")
 
+
 def edit_course_desc(request, course_id):
     data = parse_params(request)
     if data is None:
@@ -283,6 +288,7 @@ def edit_course_desc(request, course_id):
     course.description = data['desc']
     course.save()
     return HttpResponse(request)
+
 
 def update_course(request):
     data = parse_params(request)
@@ -311,7 +317,6 @@ def edit_course_lang(request, course_id):
     course.trans_lang = Language.objects.get(pk=data['lang_id'])
     course.save()
     return HttpResponse(request)
-
 
 
 def search_courses(request):
@@ -362,7 +367,6 @@ def create_lesson(request, course_id):
         return get_json_response(serializers.serialize('json', []))
 
     created = False
-    print(data);
     if 'lesson_id' in data:
         created = True
     if (not created):
@@ -383,6 +387,7 @@ def create_lesson(request, course_id):
 
     upload_questions(data['questions'], lesson)
     return get_json_response(serializers.serialize('json', [lesson]))
+
 
 def upload_questions(questions, lesson):
     for question in questions:
@@ -449,6 +454,7 @@ def get_course_lessons(request, course_id):
         return HttpResponseForbidden()
     lessonData = Lesson.objects.filter(course_id=course_id)
     return get_json_response(serializers.serialize('json', lessonData))
+
 
 def get_sentence_questions(request, lesson_id):
     data = parse_params(request)

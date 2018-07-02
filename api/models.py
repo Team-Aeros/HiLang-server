@@ -143,7 +143,6 @@ class Lesson(models.Model):
             "cat": self.category,
             "desc": self.description,
             "course": self.course,
-            "lessontype": self.lessonType,
         }
 
 class LessonCompleted(models.Model):
