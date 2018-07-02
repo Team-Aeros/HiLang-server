@@ -506,20 +506,22 @@ def get_lesson_det(request, id):
     try:
         lessonData = Lesson.objects.get(pk=id)
         courseData = Course.objects.get(pk=lessonData.course_id)
-        nativeData = Language.objects.get(pk=courseData.native_lang.id)
-        transData = Language.objects.get(pk=courseData.trans_lang.id)
-        returnData = {
-            'id': lessonData.id,
-            'name': lessonData.name,
-            'cat': lessonData.category,
-            'desc': lessonData.description,
-            'grammar': lessonData.grammar,
-            'native': nativeData.name,
-            'trans': transData.name
-        }
-        return JsonResponse(returnData)
+        if (courseData.public == 1 or courseData.user.pk == data['user_id']):
+            nativeData = Language.objects.get(pk=courseData.native_lang.id)
+            transData = Language.objects.get(pk=courseData.trans_lang.id)
+            returnData = {
+                'id': lessonData.id,
+                'name': lessonData.name,
+                'cat': lessonData.category,
+                'desc': lessonData.description,
+                'grammar': lessonData.grammar,
+                'native': nativeData.name,
+                'trans': transData.name
+            }
+            return JsonResponse(returnData)
     except ObjectDoesNotExist:
-        return HttpResponse("false")
+        pass
+    return HttpResponse("false")
 
 def is_distributor(request):
     data = parse_params(request)
