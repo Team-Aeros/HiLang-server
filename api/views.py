@@ -13,6 +13,7 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from api.models import *
 
+
 def index(request):
     return HttpResponse("Dit is een API")
 
@@ -109,10 +110,11 @@ def create_session(user):
     token = Token(token=generate_token(), user=user)
     token.save()
     response = {
-                'user_id': user.pk,
-                'token': token.token
-                }
+        'user_id': user.pk,
+        'token': token.token
+    }
     return response
+
 
 # Users
 def get_users(request):
@@ -161,12 +163,27 @@ def create_user(request):
     return JsonResponse({}, safe=False)
 
 
+def edit_user(request, user_id):
+    data = parse_params(request)
+    print(data)
+    if data is None:
+        return HttpResponseForbidden()
+    user = User.objects.get(pk=user_id)
+    user.email = data['email']
+    user.name = data['username']
+    user.avatar = data['avatar']
+    user.bio = data['bio']
+    user.save()
+    return HttpResponse(request)
+
+
 # Courses
 def get_courses(request):
     data = parse_params(request)
     if data is None:
         return HttpResponseForbidden()
     return get_json_response(serializers.serialize('json', Course.objects.all()))
+
 
 def get_popular_courses(request):
     data = parse_params(request)
@@ -179,6 +196,7 @@ def get_popular_courses(request):
         courses = Course.objects.filter(public=1).order_by('-subscribers')[:10]
     return get_json_response(serializers.serialize('json', courses))
 
+
 def get_newest_courses(request):
     data = parse_params(request)
     if data is None:
@@ -189,6 +207,7 @@ def get_newest_courses(request):
     else:
         courses = Course.objects.filter(public=1).order_by('-created_at')[:10]
     return get_json_response(serializers.serialize('json', courses))
+
 
 def get_course(request, course_id):
     data = parse_params(request)
@@ -224,6 +243,7 @@ def get_course(request, course_id):
         print(e)
         return HttpResponse('false')
 
+
 def get_public_courses(request):
     data = parse_params(request)
     if data is None:
@@ -246,7 +266,8 @@ def create_course(request):
         return HttpResponseForbidden()
 
     user = User.objects.get(pk=data['user'])
-    course = Course(name=data['name'], user=user, trans_lang=Language.objects.get(pk=data['trans_lang']), native_lang=Language.objects.get(pk=data['native_lang']), public=0)
+    course = Course(name=data['name'], user=user, trans_lang=Language.objects.get(pk=data['trans_lang']),
+                    native_lang=Language.objects.get(pk=data['native_lang']), public=0)
     course.save()
     return get_json_response(serializers.serialize('json', [course]))
 
@@ -332,16 +353,17 @@ def search_courses(request):
                 unique = False
         if unique and (course.public == 1):
             returnData.append({
-                'id'          : course.pk,
-                'name'        : course.name,
-                'description' : course.description,
-                'image'       : course.image,
-                'subscribers' : course.subscribers,
-                'author'      : author.name,
-                'trans_lang'  : course.trans_lang.pk,
-                'native_lang' : course.native_lang.pk
+                'id': course.pk,
+                'name': course.name,
+                'description': course.description,
+                'image': course.image,
+                'subscribers': course.subscribers,
+                'author': author.name,
+                'trans_lang': course.trans_lang.pk,
+                'native_lang': course.native_lang.pk
             })
     return JsonResponse(returnData, safe=False)
+
 
 def update_activity(request):
     data = parse_params(request)
@@ -357,6 +379,7 @@ def update_activity(request):
     except ObjectDoesNotExist:
         pass
     return HttpResponse("");
+
 
 def get_last_accessed(request):
     data = parse_params(request)
@@ -378,6 +401,7 @@ def get_last_accessed(request):
             'public'      : subscription.course.public
         })
     return JsonResponse(courses, safe=False);
+
 
 # Lessons
 def get_lesson_types(request):
@@ -420,7 +444,6 @@ def create_lesson(request, course_id):
     return get_json_response(serializers.serialize('json', [lesson]))
 
 
-
 def upload_questions(questions, lesson):
     for question in questions:
         entry = WordListQuestion(native=question['native'],
@@ -428,6 +451,7 @@ def upload_questions(questions, lesson):
                                  lesson=lesson,
                                  sentenceStructure=question['sentence'])
         entry.save()
+
 
 def get_lesson(request, id):
     data = parse_params(request)
@@ -487,9 +511,10 @@ def get_course_lessons(request, course_id):
     lessonData = Lesson.objects.filter(course_id=course_id)
     return get_json_response(serializers.serialize('json', lessonData))
 
+
 def get_sentence_questions(request, lesson_id):
     data = parse_params(request)
-    if (data ==None):
+    if (data == None):
         return HttpResponseForbidden()
 
     questions = []
@@ -556,6 +581,7 @@ def set_lesson_completed(request, user_id, lesson_id):
                                        lesson=Lesson.objects.get(pk=lesson_id),
                                        grade=data['grade'])
     return get_json_response(request)
+
 
 # Languages
 def get_languages(request):
