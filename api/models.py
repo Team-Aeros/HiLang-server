@@ -83,7 +83,7 @@ class Course(models.Model):
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    last_accessed = models.DateTimeField(null=True)
+    last_accessed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return '{} : {}'.format(self.user, self.course)
