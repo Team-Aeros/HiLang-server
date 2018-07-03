@@ -148,6 +148,8 @@ def create_user(request):
             return JsonResponse({'error': 'E-mail is already in user'})
         except ObjectDoesNotExist:
             try:
+                if len(data['name']) > 30:
+                    return JsonResponse({'error': 'Username is too long'})
                 salt = bcrypt.gensalt(14)
                 user = User(email=data['email'],
                             name=data['name'],
@@ -175,7 +177,7 @@ def get_popular_courses(request):
         return HttpResponseForbidden()
 
     if 'lang' in data:
-        HttpResponse('test');
+        HttpResponse('test')
     else:
         courses = Course.objects.filter(public=1).order_by('-subscribers')[:10]
     return get_json_response(serializers.serialize('json', courses))
@@ -187,7 +189,7 @@ def get_newest_courses(request):
         return HttpResponseForbidden()
 
     if 'lang' in data:
-        HttpResponse('test');
+        HttpResponse('test')
     else:
         courses = Course.objects.filter(public=1).order_by('-created_at')[:10]
     return get_json_response(serializers.serialize('json', courses))
@@ -303,8 +305,8 @@ def update_course(request):
         course.public = data['is_public']
         course.save()
     except ObjectDoesNotExist:
-        return HttpResponse('false');
-    return HttpResponse('true');
+        return HttpResponse('false')
+    return HttpResponse('true')
 
 
 def edit_course_lang(request, course_id):
@@ -359,7 +361,7 @@ def update_activity(request):
         subscription.save()
     except ObjectDoesNotExist:
         pass
-    return HttpResponse("");
+    return HttpResponse("")
 
 def get_last_accessed(request):
     data = parse_params(request)
@@ -380,7 +382,7 @@ def get_last_accessed(request):
             'native_lang' : subscription.course.native_lang.pk,
             'public'      : subscription.course.public
         })
-    return JsonResponse(courses, safe=False);
+    return JsonResponse(courses, safe=False)
 
 # Lessons
 def get_lesson_types(request):
