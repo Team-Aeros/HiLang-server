@@ -218,12 +218,10 @@ def get_course(request, course_id):
         courseData = Course.objects.get(id=course_id)
         authorData = User.objects.get(pk=courseData.user.pk)
         user = User.objects.get(pk=data['user_id'])
-        print(courseData);
         favoriteData = Favorite.objects.filter(user=user, course=Course.objects.get(pk=course_id))
         subscriptionData = Subscription.objects.filter(user=user, course=Course.objects.get(pk=course_id))
         favorite = False if not favoriteData else True
         subscription = False if not subscriptionData else True
-
         returnData = {
             'id': courseData.id,
             'name': courseData.name,
@@ -533,20 +531,22 @@ def get_lesson_det(request, id):
     try:
         lessonData = Lesson.objects.get(pk=id)
         courseData = Course.objects.get(pk=lessonData.course_id)
-        nativeData = Language.objects.get(pk=courseData.native_lang.id)
-        transData = Language.objects.get(pk=courseData.trans_lang.id)
-        returnData = {
-            'id': lessonData.id,
-            'name': lessonData.name,
-            'cat': lessonData.category,
-            'desc': lessonData.description,
-            'grammar': lessonData.grammar,
-            'native': nativeData.name,
-            'trans': transData.name
-        }
-        return JsonResponse(returnData)
+        if (courseData.public == 1 or courseData.user.pk == data['user_id']):
+            nativeData = Language.objects.get(pk=courseData.native_lang.id)
+            transData = Language.objects.get(pk=courseData.trans_lang.id)
+            returnData = {
+                'id': lessonData.id,
+                'name': lessonData.name,
+                'cat': lessonData.category,
+                'desc': lessonData.description,
+                'grammar': lessonData.grammar,
+                'native': nativeData.name,
+                'trans': transData.name
+            }
+            return JsonResponse(returnData)
     except ObjectDoesNotExist:
-        return HttpResponse("false")
+        pass
+    return HttpResponse("false")
 
 def is_distributor(request):
     data = parse_params(request)
