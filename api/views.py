@@ -531,11 +531,15 @@ def get_lesson_det(request, id):
     try:
         lessonData = Lesson.objects.get(pk=id)
         courseData = Course.objects.get(pk=lessonData.course_id)
-        if (courseData.public == 1 or courseData.user.pk == data['user_id']):
+        user = User.objects.get(pk=data['user_id'])
+        subscription = Subscription.objects.filter(course=courseData, user=user)
+
+        if ((courseData.public == 1 and  not not subscription) or courseData.user.pk == data['user_id']):
             nativeData = Language.objects.get(pk=courseData.native_lang.id)
             transData = Language.objects.get(pk=courseData.trans_lang.id)
             returnData = {
                 'id': lessonData.id,
+                'subscription': True,
                 'name': lessonData.name,
                 'cat': lessonData.category,
                 'desc': lessonData.description,
